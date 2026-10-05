@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f1eee5">
+<title>Motion Score</title>
+<style>
+:root{--paper:#f1eee5;--ink:#151515;--line:#cfc9bd;--orange:#ff4d00;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden}button,select,input{font:inherit}button{cursor:pointer}
+.app{height:100%;display:grid;grid-template-rows:52px 1fr 44px}.top{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--line);background:#f1eee5e8;backdrop-filter:blur(18px);z-index:5}
+.brand{font-weight:750;letter-spacing:-.03em;margin-right:8px;white-space:nowrap}.brand i{display:inline-block;width:12px;height:12px;border:2px solid var(--ink);border-radius:50%;margin-right:8px;position:relative}.brand i:after{content:"";position:absolute;width:5px;height:5px;background:var(--orange);border-radius:50%;right:-4px;top:-3px}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;padding:2px;background:#fff7}.seg button,.ghost{border:0;background:transparent;border-radius:7px;padding:7px 10px}.seg button.on{background:var(--ink);color:#fff}.ghost:hover{background:#0000000a}.spacer{flex:1}.status{font-size:11px;color:#69655d;white-space:nowrap}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#aaa;margin-right:6px}.ready{background:#2f9e69}.busy{background:var(--orange)}
+.work{min-height:0;display:grid;grid-template-columns:minmax(280px,30vw) 1fr 310px;gap:1px;background:var(--line)}
+.panel{min-height:0;background:var(--paper);overflow:hidden}.head{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--line);font-size:10px;text-transform:uppercase;letter-spacing:.09em}.sub{color:#716d65}
+.source{display:grid;grid-template-rows:42px 1fr auto}.videoBox{position:relative;background:#101010;display:grid;place-items:center;overflow:hidden}.videoBox video{width:100%;height:100%;object-fit:contain;transform:scaleX(-1)}.videoBox.upload video{transform:none}.overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.empty{color:#dedede;text-align:center;max-width:230px;padding:20px;font-size:12px;line-height:1.5}
+.actions{padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px;border-top:1px solid var(--line)}.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px;border-radius:9px}.btn.alt{background:transparent;color:var(--ink)}.btn.rec{background:var(--orange);border-color:var(--orange)}.hiddenInput{position:absolute;opacity:0;pointer-events:none}
+.stagePanel{display:grid;grid-template-rows:42px 1fr}.stage{position:relative;background:#f8f5ee;overflow:hidden}.stage canvas{position:absolute;inset:0;width:100%;height:100%}.art{position:absolute;left:50%;top:50%;max-width:52%;max-height:60%;transform:translate(-50%,-50%);transform-origin:center;object-fit:contain;pointer-events:none;filter:drop-shadow(0 10px 25px #0001)}.art.hide{display:none}.hint{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;color:#777;font-size:12px}.chips{position:absolute;left:12px;bottom:12px;display:flex;gap:6px}.chip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:10px}
+.score{display:grid;grid-template-rows:42px auto 1fr}.summary{padding:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-bottom:1px solid var(--line)}.metric{background:#fff8;border:1px solid var(--line);border-radius:9px;padding:8px}.metric b{display:block;font-size:16px}.metric span{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:#706b63}.channels{overflow:auto;padding:10px}.ch{padding:8px 0;border-bottom:1px solid var(--line)}.chTop{display:flex;justify-content:space-between;font-size:10px}.bar{height:4px;background:#dcd6ca;border-radius:99px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ink)}
+.bind{margin-top:12px;border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff8}.bindTitle{font-size:9px;text-transform:uppercase;letter-spacing:.09em;color:#706b63}.row{display:grid;grid-template-columns:1fr 18px 1fr;gap:4px;align-items:center;margin-top:7px}.row select{min-width:0;border:1px solid var(--line);border-radius:7px;background:var(--paper);padding:6px;font-size:10px}.arrow{text-align:center;color:#777}
+.bottom{display:flex;align-items:center;gap:8px;padding:0 10px;border-top:1px solid var(--line)}.foot{border:0;background:transparent;padding:7px 8px;border-radius:7px}.foot:hover{background:#0000000a}.timeline{height:23px;flex:1;border:1px solid var(--line);border-radius:8px;background:#fff8;overflow:hidden}.timeline canvas{width:100%;height:100%}.time{font-size:10px;color:#69655d;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}
+.toast{position:fixed;left:50%;bottom:58px;transform:translate(-50%,8px);background:#151515;color:white;padding:8px 11px;border-radius:8px;font-size:11px;opacity:0;transition:.2s;pointer-events:none;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){.work{grid-template-columns:1fr}.source,.score{position:absolute;top:52px;bottom:44px;width:min(88vw,360px);z-index:10;box-shadow:0 12px 35px #0002;transition:.2s}.source{left:0}.score{right:0}.source.closed{transform:translateX(-102%)}.score.closed{transform:translateX(102%)}.stagePanel{grid-row:1}.brand span{display:none}.status{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<div class="brand"><i></i><span>MOTION SCORE</span></div>
+<div class="seg" id="modes"><button class="on" data-mode="live">Live</button><button data-mode="upload">Upload</button></div>
+<button class="ghost" id="sourceToggle">Source</button><button class="ghost" id="scoreToggle">Score</button>
+<div class="spacer"></div><div class="status"><i class="dot" id="dot"></i><span id="status">Loading pose engine…</span></div>
+</header>
+<main class="work">
+<section class="panel source" id="sourcePanel">
+<div class="head"><strong>Movement source</strong><span class="sub" id="fps">— fps</span></div>
+<div class="videoBox" id="videoBox"><video id="video" playsinline muted></video><canvas class="overlay" id="pose"></canvas><div class="empty" id="empty">Allow camera access, then step back until your full body is visible.</div></div>
+<div class="actions"><button class="btn" id="cam">Start camera</button><button class="btn alt" id="pickVideo">Choose video</button><button class="btn alt" id="record">Record score</button><button class="btn alt" id="clear">Clear</button></div>
+<input class="hiddenInput" id="videoFile" type="file" accept="video/*">
+</section>
+<section class="panel stagePanel">
+<div class="head"><strong>Performance</strong><span class="sub">motion, not generated video</span></div>
+<div class="stage" id="stage"><canvas id="stageCanvas"></canvas><img id="art" class="art hide" alt=""><div class="hint" id="hint">Drop an image here to choreograph it</div><div class="chips"><span class="chip">body → motion score</span><span class="chip" id="poseState">no pose yet</span></div></div>
+</section>
+<section class="panel score" id="scorePanel">
+<div class="head"><strong>Motion score</strong><span class="sub" id="frameCount">0 frames</span></div>
+<div class="summary"><div class="metric"><b id="mEnergy">0</b><span>energy</span></div><div class="metric"><b id="mSpace">0</b><span>space</span></div><div class="metric"><b id="mTurn">0°</b><span>turn</span></div></div>
+<div class="channels" id="channels"></div>
+</section>
+</main>
+<footer class="bottom"><button class="foot" id="pickArt">Import artwork</button><button class="foot" id="export">Export score</button><input class="hiddenInput" id="artFile" type="file" accept="image/*"><div class="timeline"><canvas id="timeline"></canvas></div><div class="time" id="time">00:00.0</div></footer>
+</div><div class="toast" id="toast"></div>
+<script type="module">
+import{FilesetResolver,PoseLandmarker,DrawingUtils}from"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/+esm";
+const $=id=>document.getElementById(id);
+const CH=[["energy","ENERGY"],["expansion","EXPANSION"],["vertical","VERTICAL"],["travelX","TRAVEL X"],["rotation","TORSO ROTATION"],["armsOpen","ARMS OPEN"],["leftHandY","LEFT HAND"],["rightHandY","RIGHT HAND"],["symmetry","SYMMETRY"]];
+let poseLandmarker,stream=null,mode="live",running=false,recording=false,frames=[],last=null,lastT=0,lastPose=0,startT=0,metrics=Object.fromEntries(CH.map(x=>[x[0],0]));
+let bind={imageX:"travelX",imageY:"vertical",imageScale:"expansion",imageRotate:"rotation",particles:"energy"},artUrl=null;
+$("channels").innerHTML=CH.map(x=>'<div class="ch"><div class="chTop"><b>'+x[1]+'</b><span id="v-'+x[0]+'">0.00</span></div><div class="bar"><i id="b-'+x[0]+'"></i></div></div>').join("")+
+'<div class="bind"><div class="bindTitle">Bind movement to artwork</div>'+row("imageX","Artwork X")+row("imageY","Artwork Y")+row("imageScale","Artwork scale")+row("imageRotate","Artwork rotation")+row("particles","Particles")+'</div>';
+function row(k,label){return'<div class="row"><select disabled><option>'+label+'</option></select><span class="arrow">←</span><select data-bind="'+k+'">'+CH.map(x=>'<option value="'+x[0]+'" '+(bind[k]===x[0]?"selected":"")+'>'+x[1]+'</option>').join("")+'</select></div>'}
+document.querySelectorAll("[data-bind]").forEach(s=>s.onchange=e=>bind[e.target.dataset.bind]=e.target.value);
+function status(t,state=""){$("status").textContent=t;$("dot").className="dot "+state}
+function say(t){$("toast").textContent=t;$("toast").classList.add("show");clearTimeout(say.t);say.t=setTimeout(()=>$("toast").classList.remove("show"),1800)}
+async function boot(){try{const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm");poseLandmarker=await PoseLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",delegate:"GPU"},runningMode:"VIDEO",numPoses:1,minPoseDetectionConfidence:.45,minPosePresenceConfidence:.45,minTrackingConfidence:.45});status("Pose engine ready","ready")}catch(e){console.error(e);status("Pose engine failed");say("Refresh to retry MediaPipe")}requestAnimationFrame(render)}
+boot();
+$("cam").onclick=startCamera;$("pickVideo").onclick=()=>$("videoFile").click();$("videoFile").onchange=e=>e.target.files[0]&&loadVideo(e.target.files[0]);$("record").onclick=toggleRecord;$("clear").onclick=()=>{frames=[];startT=0;updateCount();drawTimeline();say("Score cleared")};
+$("pickArt").onclick=()=>$("artFile").click();$("artFile").onchange=e=>e.target.files[0]&&loadArt(e.target.files[0]);$("export").onclick=exportScore;
+$("sourceToggle").onclick=()=>$("sourcePanel").classList.toggle("closed");$("scoreToggle").onclick=()=>$("scorePanel").classList.toggle("closed");
+$("modes").onclick=e=>{if(!e.target.dataset.mode)return;e.target.dataset.mode==="live"?startCamera():$("videoFile").click()};
+function sync(){document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===mode));$("videoBox").classList.toggle("upload",mode==="upload")}
+async function startCamera(){if(!poseLandmarker){say("Pose engine still loading");return}stopCamera();mode="live";sync();try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},audio:false});$("video").srcObject=stream;$("video").controls=false;await $("video").play();running=true;$("empty").style.display="none";status("Live tracking","ready");loop()}catch(e){console.error(e);status("Camera permission needed");say("Allow camera access for live mode")}}
+function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if($("video").srcObject)$("video").srcObject=null;running=false}
+function loadVideo(file){stopCamera();mode="upload";sync();$("video").src=URL.createObjectURL(file);$("video").controls=true;$("empty").style.display="none";$("video").onloadeddata=async()=>{running=true;await $("video").play().catch(()=>{});status("Analysing uploaded dance","busy");loop()};$("video").onended=()=>{running=false;status("Analysis complete","ready")}}
+function toggleRecord(){recording=!recording;if(recording){frames=[];startT=performance.now();$("record").textContent="Stop recording";$("record").classList.add("rec");status("Recording motion score","busy")}else{$("record").textContent="Record score";$("record").classList.remove("rec");status(running?"Tracking":"Score captured","ready");say(frames.length+" motion frames captured")}}
+async function loop(){if(!running||!poseLandmarker)return;if($("video").readyState>=2&&!$("video").paused){const now=performance.now();if(now-lastPose>22){const r=poseLandmarker.detectForVideo($("video"),now);lastPose=now;if(r.landmarks&&r.landmarks.length){const lm=r.landmarks[0];metrics=derive(lm,now);drawPose(lm);paintMetrics(metrics);applyArt(metrics);if(recording){frames.push({t:now-startT,m:{...metrics},landmarks:lm.map(p=>({x:p.x,y:p.y,z:p.z,visibility:p.visibility}))});updateCount();if(frames.length%4===0)drawTimeline()}$("poseState").textContent="pose locked"}else{$("poseState").textContent="finding body…";clearPose()}}}requestAnimationFrame(loop)}
+const p=(lm,i)=>lm[i]||{x:0,y:0,z:0,visibility:0},dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+function derive(lm,now){const vis=lm.filter(p=>(p.visibility??1)>.35);if(!vis.length)return metrics;const xs=vis.map(p=>p.x),ys=vis.map(p=>p.y),ls=p(lm,11),rs=p(lm,12),lw=p(lm,15),rw=p(lm,16),lh=p(lm,23),rh=p(lm,24),hip={x:(lh.x+rh.x)/2,y:(lh.y+rh.y)/2},sw=Math.max(.06,dist(ls,rs)),dt=Math.max(.016,(now-lastT)/1000);let energy=0;if(last&&last.raw){[11,12,13,14,15,16,23,24,25,26,27,28].forEach(i=>energy+=dist(p(lm,i),last.raw[i]));energy=energy/12/dt}const lhy=clamp(1-lw.y),rhy=clamp(1-rw.y),rotation=clamp((Math.atan2(rs.y-ls.y,rs.x-ls.x)+Math.PI/2)/Math.PI),out={energy:clamp(energy/3.5),expansion:clamp(((Math.max(...xs)-Math.min(...xs))*(Math.max(...ys)-Math.min(...ys)))/.42),vertical:clamp(1-hip.y),travelX:clamp(hip.x),rotation,armsOpen:clamp(dist(lw,rw)/(sw*5)),leftHandY:lhy,rightHandY:rhy,symmetry:clamp(1-Math.abs(dist(lw,ls)-dist(rw,rs))*3-Math.abs(lhy-rhy)*.35)};last={...out,raw:lm.map(q=>({...q}))};lastT=now;return out}
+function drawPose(lm){const c=$("pose"),r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d)}const x=c.getContext("2d");x.save();x.scale(d,d);x.clearRect(0,0,r.width,r.height);if(mode==="live"){x.translate(r.width,0);x.scale(-1,1)}const du=new DrawingUtils(x);du.drawConnectors(lm,PoseLandmarker.POSE_CONNECTIONS,{color:"#f1eee5",lineWidth:2});du.drawLandmarks(lm,{color:"#ff4d00",fillColor:"#ff4d00",radius:2});x.restore()}
+function clearPose(){const c=$("pose");c.getContext("2d").clearRect(0,0,c.width,c.height)}
+function paintMetrics(m){CH.forEach(x=>{$("v-"+x[0]).textContent=(m[x[0]]||0).toFixed(2);$("b-"+x[0]).style.width=((m[x[0]]||0)*100)+"%"});$("mEnergy").textContent=Math.round(m.energy*100);$("mSpace").textContent=Math.round(m.expansion*100);$("mTurn").textContent=Math.round((m.rotation-.5)*180)+"°"}
+function loadArt(file){if(artUrl)URL.revokeObjectURL(artUrl);artUrl=URL.createObjectURL(file);$("art").src=artUrl;$("art").classList.remove("hide");$("hint").style.display="none";say("Artwork imported — move to choreograph it")}
+["dragenter","dragover"].forEach(n=>$("stage").addEventListener(n,e=>e.preventDefault()));$("stage").addEventListener("drop",e=>{e.preventDefault();const f=[...e.dataTransfer.files].find(f=>f.type.startsWith("image/"));if(f)loadArt(f)});
+function applyArt(m){if($("art").classList.contains("hide"))return;const x=(m[bind.imageX]-.5)*220,y=(.5-m[bind.imageY])*150,s=.65+(m[bind.imageScale]||0)*.9,r=((m[bind.imageRotate]||.5)-.5)*120;$("art").style.transform="translate(calc(-50% + "+x+"px),calc(-50% + "+y+"px)) scale("+s+") rotate("+r+"deg)"}
+function render(t){const c=$("stageCanvas"),r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d)}const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,r.width,r.height);const m=metrics,e=m[bind.particles]||0,cx=r.width*(.5+(m.travelX-.5)*.35),cy=r.height*(.52-(m.vertical-.5)*.2);for(let i=0;i<20;i++){const a=i/20*Math.PI*2+t*.0002*(.4+e*3),rr=45+i*4+m.expansion*65;x.beginPath();x.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.55,1.2+e*2,0,Math.PI*2);x.fillStyle=i%4===0?"#ff4d00":"#151515";x.fill()}x.globalAlpha=.15;x.beginPath();x.arc(cx,cy,45+m.armsOpen*80,0,Math.PI*2);x.strokeStyle="#151515";x.stroke();x.globalAlpha=1;requestAnimationFrame(render)}
+function updateCount(){$("frameCount").textContent=frames.length+" frames";const ms=frames.at(-1)?.t||0;$("time").textContent=time(ms)}
+function time(ms){const s=ms/1000;return String(Math.floor(s/60)).padStart(2,"0")+":"+String(Math.floor(s%60)).padStart(2,"0")+"."+Math.floor((s%1)*10)}
+function drawTimeline(){const c=$("timeline"),r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,r.width,r.height);if(frames.length<2)return;const max=frames.at(-1).t||1;x.beginPath();frames.forEach((f,i)=>{const px=f.t/max*r.width,py=r.height-(f.m.energy*.8+.1)*r.height;i?x.lineTo(px,py):x.moveTo(px,py)});x.strokeStyle="#ff4d00";x.lineWidth=1.5;x.stroke()}
+function exportScore(){if(!frames.length){say("Record movement first");return}const b=new Blob([JSON.stringify({format:"motion-score/v1",createdAt:new Date().toISOString(),channels:CH.map(x=>({key:x[0],name:x[1]})),frames},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="motion-score.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+addEventListener("resize",drawTimeline);
+</script>
+</body>
+</html>
